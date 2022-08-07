@@ -14,7 +14,9 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(mnist)
 
+set(CMAKE_PREFIX_PATH /usr/include/libtorch/share/cmake/)
 find_package(Torch REQUIRED)
+include_directories(${TORCH_INCLUDE_DIRS})
 find_package(OpenCV REQUIRED)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS})
@@ -23,7 +25,11 @@ add_executable(train
         src/train.cpp
         src/utils.cpp
         )
+add_library(libgomp SHARED IMPORTED)
+set_property(TARGET libgomp PROPERTY IMPORTED_LOCATION "/usr/lib/libgomp.so")
+target_link_libraries(train libgomp)
 target_link_libraries(train ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+
 set_property(TARGET train PROPERTY CXX_STANDARD 20)
 
 add_executable(test
@@ -31,6 +37,7 @@ add_executable(test
         src/utils.cpp
         )
 target_link_libraries(test ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(test libgomp)
 set_property(TARGET test PROPERTY CXX_STANDARD 20)
 
 add_executable(detect
@@ -39,4 +46,5 @@ add_executable(detect
         src/utils.cpp
         )
 target_link_libraries(detect ${TORCH_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(detect libgomp)
 set_property(TARGET detect PROPERTY CXX_STANDARD 20)
